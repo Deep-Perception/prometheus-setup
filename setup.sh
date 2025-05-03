@@ -74,6 +74,30 @@ else
     echo "No supported Hailo device found, skipping driver install"
 fi
 
+# Copy the right docker-compose.yaml file
+
+if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
+    if [[ $hailo8_count -eq 1 ]]; then
+	    echo "H8-1"
+    elif [[ $hailo8_count -eq 2 ]]; then
+	    echo "H8-2"
+    elif [[ $hailo8_count -eq 4 ]]; then
+            echo "H8-4"
+    else
+	    echo "Hailo-8:" $hailo8_count " not supported"
+    fi
+elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
+    if [[ $hailo10_count -eq 1 ]]; then
+            echo "H10-1"
+    elif [[ $hailo10_count -eq 2 ]]; then
+            echo "H10-2"
+    elif [[ $hailo10_count -eq 4 ]]; then
+            echo "H10-4"
+    else
+            echo "Hailo-10:" $hailo10_count " not supported"
+    fi
+fi
+
 #
 #Install Misc Packages
 #

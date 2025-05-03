@@ -65,11 +65,11 @@ fi
 
 # Install appropriate driver
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
-    curl -O -z hailort-pcie-driver_4.21.0_all.deb https://storage.googleapis.com/deepperception_public/hailort-pcie-driver_4.21.0_all.deb
+    curl -O -z hailort-pcie-driver_4.21.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
-    curl -O -z hailort-pcie-driver_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/h10/hailort-pcie-driver_4.22.0_all.deb
-    yes | sudo dpkg -i hailort-pcie-driver_4.22.0_all.deb
+    curl -O -z 2280-hailo10h-driver-fw_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
+    yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
 else
     echo "No supported Hailo device found, skipping driver install"
 fi

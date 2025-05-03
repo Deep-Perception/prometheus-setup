@@ -1,0 +1,5 @@
+#Remove existing symlinks for onboard cameras
+SUBSYSTEM=="video4linux", ENV{ID_V4L_PRODUCT}=="HP 5MP Camera: HP 5MP Camera", RUN+="/bin/bash -c 'rm -f /dev/v4l/by-id/usb-Quanta_HP* /dev/v4l/by-id/usb-SunplusIT_Inc_HP_5MP_Camera*'"
+
+#Create new symlink for 5MP optical camera
+SUBSYSTEM=="video4linux", ENV{ID_V4L_PRODUCT}=="HP 5MP Camera: HP 5MP Camera", ENV{ID_V4L_CAPABILITIES}=="*:capture:*", SYMLINK+="v4l/by-id/usb-onboard_camera_FAKESN-video-index0"

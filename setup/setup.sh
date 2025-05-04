@@ -65,9 +65,9 @@ fi
 
 # Uninstall existing drivers
 
-PACKAGES=("hailo10h-driver-fw" "hailort-pcie-driver")
+HAILO_PACKAGES=("hailo10h-driver-fw" "hailort-pcie-driver")
 
-for pkg in "${PACKAGES[@]}"; do
+for pkg in "${HAILO_PACKAGES[@]}"; do
     if dpkg -l | grep -q "^ii  $pkg "; then
         echo "-I- Uninstalling $pkg"
         sudo apt-get remove --purge -y "$pkg"

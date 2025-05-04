@@ -51,8 +51,8 @@ HAILO_VERSION=""
 
 # Decision logic
 if [[ $hailo8_count -gt 0 && $hailo10_count -gt 0 ]]; then
-    HAILO_VERSION="not supported"
-    echo "$HAILO_VERSION"
+    HAILO_VERSION="Not_Supported""
+    echo "Hailo-8 and Hailo-10 in the same system is not supported!""
 elif [[ $hailo8_count -gt 0 ]]; then
     HAILO_VERSION="Hailo-8"
     echo "$HAILO_VERSION: $hailo8_count"
@@ -60,7 +60,7 @@ elif [[ $hailo10_count -gt 0 ]]; then
     HAILO_VERSION="Hailo-10"
     echo "$HAILO_VERSION: $hailo10_count"
 else
-    echo "No Hailo devices found"
+    echo "No Supported Hailo devices found!"
 fi
 
 # Install appropriate driver
@@ -71,7 +71,7 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     curl -O -z 2280-hailo10h-driver-fw_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
     yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
 else
-    echo "No supported Hailo device found, skipping driver install"
+    echo "Supported Hailo configuration not found, skipping driver install"
 fi
 
 # Copy the right docker-compose.yaml file

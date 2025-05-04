@@ -51,8 +51,8 @@ HAILO_VERSION=""
 
 # Decision logic
 if [[ $hailo8_count -gt 0 && $hailo10_count -gt 0 ]]; then
-    HAILO_VERSION="Not_Supported""
-    echo "Hailo-8 and Hailo-10 in the same system is not supported!""
+    HAILO_VERSION="Not_Supported"
+    echo "Hailo-8 and Hailo-10 in the same system is not supported!"
 elif [[ $hailo8_count -gt 0 ]]; then
     HAILO_VERSION="Hailo-8"
     echo "$HAILO_VERSION: $hailo8_count"

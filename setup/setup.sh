@@ -63,6 +63,19 @@ else
     echo "No Supported Hailo devices found!"
 fi
 
+# Uninstall existing drivers
+
+PACKAGES=("hailo10h-driver-fw" "hailort-pcie-driver")
+
+for pkg in "${PACKAGES[@]}"; do
+    if dpkg -l | grep -q "^ii  $pkg "; then
+        echo "-I- Uninstalling $pkg"
+        sudo apt-get remove --purge -y "$pkg"
+    else
+        echo "-I- $pkg not installed"
+    fi
+done
+
 # Install appropriate driver
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     curl -O -z hailort-pcie-driver_4.21.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 

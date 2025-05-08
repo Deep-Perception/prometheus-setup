@@ -129,7 +129,7 @@ docker pull ../docker-compose.yaml
 #
 #Install Misc Packages
 #
-sudo apt-get install nmap net-tools openssh-server vim -y
+sudo apt-get install openssh-server vim -y
 
 sudo ./increase_fd_limits.sh
 

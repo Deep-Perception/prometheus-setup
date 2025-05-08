@@ -119,9 +119,6 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     fi
 fi
 
-#Download the container images but do not run app
-docker pull ../docker-compose.yaml
-
 #
 #Install Misc Packages
 #
@@ -135,5 +132,12 @@ sudo ./increase_fd_limits.sh
 sudo cp 99-custom-camera.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+
+# Remove downloaded debs
+rm *.deb
+
+# Pull containers
+cd .. || { echo "Failed to change directory"; exit 1; }
+docker compose pull
 
 echo -e "\n\nReboot Needed to Complete Hailo Driver Install!!!\n\n"

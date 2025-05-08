@@ -4,8 +4,21 @@
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
-#Install curl which is used by the script
-sudo apt install curl -y
+#Install setup deps 
+sudo apt install curl mokutil -y
+
+# Check Secure Boot status
+SECURE_BOOT_STATUS=$(mokutil --sb-state 2>/dev/null)
+
+if echo "$SECURE_BOOT_STATUS" | grep -q "SecureBoot enabled"; then
+    echo
+    echo "Error: Secure Boot is enabled. Please disable it in BIOS/UEFI to proceed."
+    echo
+    exit 1
+else
+    echo "Secure Boot is disabled. Continuing..."
+fi
+
 
 #
 #Install Docker
@@ -137,7 +150,8 @@ sudo udevadm trigger
 rm *.deb
 
 # Pull containers
-cd .. || { echo "Failed to change directory"; exit 1; }
-docker compose pull
+{
+	cd .. && docker compose pull
+}
 
 echo -e "\n\nReboot Needed to Complete Hailo Driver Install!!!\n\n"

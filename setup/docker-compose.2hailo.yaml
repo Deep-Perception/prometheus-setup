@@ -1,0 +1,321 @@
+volumes:
+  db:
+  snapshots:
+  edge-config-cache:
+  hp-config-cache:
+  influxdb-data:
+  grafana-data:
+
+networks:
+  monitoring_net:
+
+services:
+  db:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=dp_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  hp_config:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config:latest
+    ports:
+      - 50060:50060
+    command: [
+      -logtostderr
+    ]
+    depends_on:
+      - iris_router
+    volumes:
+      - hp-config-cache:/tmp/snapshots
+
+  turn_server:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/turn-server:latest
+    network_mode: host
+    command: [
+      -logtostderr
+    ]
+    
+  edge_config:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:latest
+    depends_on:
+      - db
+      - iris_router
+    command: [
+      --json_db_file=/data/event_templates.json,
+      --cache_dir=/tmp/cache,
+      -logtostderr
+    ]
+    environment:
+      - MAX_CAMERA_NUM=8
+      - DB_PASSWORD=postgres
+      - DB_USER=postgres
+      - DB_NAME=dp_db
+      - DB_PORT=5432
+      - DB_HOST=db
+      - DP_IRIS_ADDRESS=dp-envoy:8080
+      - AUTO_LOGIN=true
+    ports:
+      - "50051:50051"
+    volumes:
+      # NOTE: the mounted location needs to match --cache_dir
+      - edge-config-cache:/tmp/cache
+    restart: always
+
+  hailo_service:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:latest
+    network_mode: host
+    privileged: true
+    volumes:
+      - /tmp/hmon_files:/tmp/hmon_files
+
+  usb_cameras:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/usb-cameras:latest
+    privileged: true
+    ports:
+      - "50054:50054"
+    volumes:
+      - /dev/v4l/by-id:/dev/v4l/by-id
+    command: [
+      -logtostderr
+    ]
+    restart: always
+
+  iris_router:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-router:latest
+    ports:
+      - "50052:50052"
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
+    command: [
+      "--backends=host.docker.internal:50056,host.docker.internal:50057",
+      "-logtostderr"
+    ]
+    depends_on:
+      - iris_server1
+      - iris_server
+
+  iris_server:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    network_mode: host
+    privileged: true
+    command: [
+      --grpc_port=50056
+    ]
+    environment:
+      - EVENTS_SERVER_HOST=0.0.0.0
+      # TODO(chris): added for X11
+      - DISPLAY=$DISPLAY
+      # - GST_DEBUG=*:4
+      - HAILO_MONITOR=1
+      # Colors for bounding box and text overlay on the visualizer stream.
+      # Depending on the demo environment, you may want to change the color to
+      # make the detections standout. Recommended values are:
+      # - Green: 0,255,0
+      # - White: 255,255,255
+      # - Red: 255,0,0
+      # - Light blue: 34,177,227
+      # - Dark blue: 50,67,128
+      - IRIS_OVERLAY_COLOR_RGB=0,255,0
+      # FPS for CPU mode. Default is 10 FPS if not specified
+      - IRIS_CPU_FPS=12
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_DEVICE_IDX=1
+      - NO_EVENT_SEND=true
+
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      # Uncomment for Hailo
+      - /dev/hailo0:/dev/hailo0
+      # - /dev/hailo1:/dev/hailo1
+      # - /dev/hailo1:/dev/hailo1
+      # Uncomment for coral PCIe
+      # - /dev/apex_0:/dev/apex_0
+      # Uncomment for coral USB
+      - /dev/bus/usb:/dev/bus/usb
+    volumes:
+      - snapshots:/videos
+      - /dev/dri:/dev/dri
+      - /dev/:/dev/
+      # - /dev/hailo1:/dev/hailo1
+      - /dev/bus/usb:/dev/bus/usb
+      # TODO(chris): added for X11
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/hmon_files:/tmp/hmon_files
+      - /dev/v4l/by-id:/dev/v4l/by-id
+    group_add:
+      - "109"
+      - "110"
+      - "44"
+      - "46"
+    restart: always
+    depends_on:
+      - webrtc
+
+  iris_server1:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    network_mode: host
+    privileged: true
+    command: [
+      --grpc_port=50057
+    ]
+    environment:
+      - EVENTS_SERVER_HOST=0.0.0.0
+      # TODO(chris): added for X11
+      - DISPLAY=$DISPLAY
+      # - GST_DEBUG=*:4
+      - HAILO_MONITOR=1
+      # Colors for bounding box and text overlay on the visualizer stream.
+      # Depending on the demo environment, you may want to change the color to
+      # make the detections standout. Recommended values are:
+      # - Green: 0,255,0
+      # - White: 255,255,255
+      # - Red: 255,0,0
+      # - Light blue: 34,177,227
+      # - Dark blue: 50,67,128
+      - IRIS_OVERLAY_COLOR_RGB=0,255,0
+      # FPS for CPU mode. Default is 10 FPS if not specified
+      - IRIS_CPU_FPS=12
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_DEVICE_IDX=2
+      - NO_EVENT_SEND=true
+
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      # Uncomment for Hailo
+      - /dev/hailo0:/dev/hailo0
+      # - /dev/hailo1:/dev/hailo1
+      # - /dev/hailo1:/dev/hailo1
+      # Uncomment for coral PCIe
+      # - /dev/apex_0:/dev/apex_0
+      # Uncomment for coral USB
+      - /dev/bus/usb:/dev/bus/usb
+    volumes:
+      - snapshots:/videos
+      - /dev/dri:/dev/dri
+      - /dev/:/dev/
+      # - /dev/hailo1:/dev/hailo1
+      - /dev/bus/usb:/dev/bus/usb
+      # TODO(chris): added for X11
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/hmon_files:/tmp/hmon_files
+      - /dev/v4l/by-id:/dev/v4l/by-id
+    group_add:
+      - "109"
+      - "110"
+      - "44"
+      - "46"
+    restart: always
+    depends_on:
+      - webrtc
+
+  dp-envoy:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "9090:9090"
+    environment:
+      - ENVOY_UID=0
+      - DP_EDGE_CONFIG_HOSTNAME=edge_config
+      - DP_EVENTS_SERVER_HOSTNAME=events_server
+      - DP_IRIS_SERVER_HOSTNAME=iris_router
+      - DP_HP_CONFIG_HOSTNAME=hp_config
+    depends_on:
+      - edge_config
+
+  frontend:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/frontend:latest
+    network_mode: host
+    ports:
+      - "8082:8082"
+    environment:
+      - DP_ENVOY_HOSTNAME=dp-envoy
+      - DP_WEBRTC_HOSTNAME=0.0.0.0
+    depends_on:
+      - dp-envoy
+
+  webrtc:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/webrtc:latest
+    ports:
+      - "7777:7777"
+    restart: always
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
+    command: [
+      -logtostderr
+    ]
+    
+  # Metrics and monitoring part of the deployment
+  influxdb:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/influxdb:latest
+    environment:
+      - INFLUXDB_DB=telegraf
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=adminpassword
+      - INFLUXDB_USER=telegraf
+      - INFLUXDB_USER_PASSWORD=telegrafpassword
+    ports:
+      - "8086:8086"
+    networks:
+      - monitoring_net
+
+  telegraf:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:latest
+    privileged: true
+    depends_on:
+      - influxdb
+    volumes:
+      # Mount RAPL directory
+      - /sys/class/powercap:/sys/class/powercap:ro
+      - /sys/devices/virtual/powercap:/sys/devices/virtual/powercap:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /tmp/logs:/tmp/logs
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+      - HOST_ROOT=/rootfs
+    networks:
+      - monitoring_net
+
+  grafana:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    #volumes:
+    #  - grafana-data:/var/lib/grafana:rw
+
+    networks:
+      - monitoring_net
+
+  hailo-monitor:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-monitor-${HAILO_ARCH}:latest
+    # So hailo monitor files can be read from iris
+    privileged: true
+    volumes:
+      - /tmp/hmon_files:/tmp/hmon_files
+      - /tmp/logs:/tmp/logs
+      - /dev:/dev
+    depends_on:
+      - iris_server1
+    restart: always
+
+  mediamtx:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:latest
+    network_mode: host

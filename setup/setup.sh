@@ -96,28 +96,24 @@ fi
 # Copy the right docker-compose.yaml file
 
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
+    echo "HAILO_ARCH=h8" > ../.env
     if [[ $hailo8_count -eq 1 ]]; then
-	    echo "Copying docker-compose-h8-1.yaml to docker-compose.yaml"
-	    cp docker-compose-h8-1.yaml ../docker-compose.yaml
+	    cp docker-compose.1hailo.yaml ../docker-compose.yaml
     elif [[ $hailo8_count -eq 2 ]]; then
-	    echo "Copying docker-compose-h8-2.yaml to docker-compose.yaml"
-	    cp docker-compose-h8-2.yaml ../docker-compose.yaml
+	    cp docker-compose.2hailo.yaml ../docker-compose.yaml
     elif [[ $hailo8_count -eq 4 ]]; then
-            echo "Copying docker-compose-h8-4.yaml to docker-compose.yaml"
-            cp docker-compose-h8-4.yaml ../docker-compose.yaml
+            cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else
 	    echo "Hailo-8:" $hailo8_count " not supported"
     fi
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
+    echo "HAILO_ARCH=h10" > ../.env
     if [[ $hailo10_count -eq 1 ]]; then
-            echo "Copying docker-compose-h10-1.yaml to docker-compose.yaml"
-            cp docker-compose-h10-1.yaml ../docker-compose.yaml
+            cp docker-compose.1hailo.yaml ../docker-compose.yaml
     elif [[ $hailo10_count -eq 2 ]]; then
-            echo "Copying docker-compose-h10-2.yaml to docker-compose.yaml"
-            cp docker-compose-h10-2.yaml ../docker-compose.yaml
+            cp docker-compose.2hailo.yaml ../docker-compose.yaml
     elif [[ $hailo10_count -eq 4 ]]; then
-    	    echo "Copying docker-compose-h10-4.yaml to docker-compose.yaml"
-            cp docker-compose-h10-4.yaml ../docker-compose.yaml
+            cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else
             echo "Hailo-10:" $hailo10_count " not supported"
     fi

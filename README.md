@@ -22,7 +22,7 @@
 
 ## Maintenance Operations
 
-1. `docker system prune --all` followed by `docker volumes prune --all` will completely clear out the software
+1. `docker system prune --all` followed by `docker volume prune --all` will completely clear out the software
 2. `docker compose pull` will download the latest containers without running them 
 
 # Demo Configuration

@@ -5,7 +5,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 #Install setup deps 
-sudo apt install curl mokutil -y
+sudo apt-get curl mokutil -y
 
 # Check Secure Boot status
 SECURE_BOOT_STATUS=$(mokutil --sb-state 2>/dev/null)

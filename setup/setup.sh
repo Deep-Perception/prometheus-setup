@@ -1,7 +1,11 @@
 #!/bin/bash
 
+#Update system
 sudo apt-get update -y
 sudo apt-get upgrade -y
+
+#Install curl which is used by the script
+sudo apt install curl -y
 
 #
 #Install Docker
@@ -37,6 +41,8 @@ sudo apt install ./google-chrome-stable_current_amd64.deb -y
 #
 #Install Hailo Driver
 #
+
+#Deps to build and install kernel module
 sudo apt-get install build-essential dkms pciutils -y 
 
 # Run lspci -n and filter for vendor 1e60

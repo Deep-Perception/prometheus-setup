@@ -117,6 +117,9 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     fi
 fi
 
+#Download the container images but do not run app
+docker pull ../docker-compose.yaml
+
 #
 #Install Misc Packages
 #

@@ -40,6 +40,12 @@
 
 ![Add Video Loops](images/Add_Video_Loops.png)
 
+### Live View
+
+Use the slider to adjust the number of videos and the toggles to turn on/off Hailo accelerators or the person attributes model.
+
+![Live View](images/Live_View.png)
+
 ## Maintenance Operations
 
 1. `docker system prune --all` followed by `docker volume prune --all` will completely clear out the software

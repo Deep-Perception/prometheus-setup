@@ -24,6 +24,22 @@
 - 2 Hailo: 8 Sources
 - 4 Hailo: 16 Sources
 
+### Adding ONVIF Cameras
+
+![Add ONVIF Camera](images/Add_ONVIF.png)
+
+### Adding RTSP Streams
+
+![Add RTSP Stream](images/Add_RTSP.png)
+
+### Adding USB Cameras
+
+![Add USB Camera](images/Add_USB.png)
+
+### Adding Built in Video Loops
+
+![Add Video Loops](images/Add_Video_Loops.png)
+
 ## Maintenance Operations
 
 1. `docker system prune --all` followed by `docker volume prune --all` will completely clear out the software

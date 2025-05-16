@@ -48,5 +48,5 @@ Use the slider to adjust the number of videos and the toggles to turn on/off Hai
 
 ## Maintenance Operations
 
-1. `docker system prune --all` followed by `docker volume prune --all` will completely clear out the software
+1. `docker system prune --all` followed by `docker volume prune --all` will completely clear out the software or run the reset.sh script.
 2. `docker compose pull` will download the latest containers without running them 

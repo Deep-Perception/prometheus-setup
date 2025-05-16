@@ -38,6 +38,7 @@ services:
       - dp-envoy
     volumes:
       - hp-config-cache:/tmp/snapshots
+      - /tmp/logs:/tmp/logs
 
   turn_server:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/turn-server:latest

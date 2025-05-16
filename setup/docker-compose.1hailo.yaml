@@ -27,7 +27,7 @@ services:
       - db:/var/lib/postgresql/data
 
   hp_config:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config-${HAILO_ARCH}:latest
     ports:
       - 50060:50060
     command: [

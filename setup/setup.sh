@@ -126,32 +126,35 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     	yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
     fi
 else
-    echo "Supported Hailo configuration not found, skipping driver install"
+    echo -e "\n\nSupported Hailo configuration not found, skipping driver install\n\n"
+    exit 1
 fi
 
 # Copy the right docker-compose.yaml file
 
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     echo "HAILO_ARCH=h8" > ../.env
-    if [[ $hailo8_count -eq 1 ]]; then
+    if [[ "$hailo8_count" -eq 1 ]]; then
 	    cp docker-compose.1hailo.yaml ../docker-compose.yaml
-    elif [[ $hailo8_count -eq 2 ]]; then
+    elif [[ "$hailo8_count" -eq 2 ]]; then
 	    cp docker-compose.2hailo.yaml ../docker-compose.yaml
-    elif [[ $hailo8_count -eq 4 ]]; then
+    elif [[ "$hailo8_count" -eq 4 ]]; then
             cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else
-	    echo "Hailo-8:" $hailo8_count " not supported"
+	    echo -e "\n\nHailo-8: $hailo8_count devices not supported\n\n"
+	    exit 1
     fi
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     echo "HAILO_ARCH=h10" > ../.env
-    if [[ $hailo10_count -eq 1 ]]; then
+    if [[ "$hailo10_count" -eq 1 ]]; then
             cp docker-compose.1hailo.yaml ../docker-compose.yaml
-    elif [[ $hailo10_count -eq 2 ]]; then
-            cp docker-compose.2hailo.yaml ../docker-compose.yaml
-    elif [[ $hailo10_count -eq 4 ]]; then
-            cp docker-compose.4hailo.yaml ../docker-compose.yaml
+#   elif [[ "$hailo10_count" -eq 2 ]]; then
+#           cp docker-compose.2hailo.yaml ../docker-compose.yaml
+#   elif [[ "$hailo10_count" -eq 4 ]]; then
+#            cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else
-            echo "Hailo-10:" $hailo10_count " not supported"
+            echo -e "\n\nHailo-10: $hailo10_count devices not supported\n\n"
+	    exit 1
     fi
 fi
 

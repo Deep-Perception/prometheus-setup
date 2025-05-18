@@ -71,7 +71,7 @@ services:
     volumes:
       # NOTE: the mounted location needs to match --cache_dir
       - edge-config-cache:/tmp/cache
-    restart: always
+    restart: unless-stopped 
 
   hailo_service:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:latest
@@ -90,7 +90,7 @@ services:
     command: [
       -logtostderr
     ]
-    restart: always
+    restart: unless-stopped 
 
   iris_router:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-router:latest
@@ -153,7 +153,7 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped 
     depends_on:
       - webrtc
       - mediamtx
@@ -206,7 +206,7 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped 
     depends_on:
       - webrtc
 
@@ -240,7 +240,7 @@ services:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/webrtc:latest
     ports:
       - "7777:7777"
-    restart: always
+    restart: unless-stopped 
     extra_hosts:
         - "host.docker.internal:host-gateway"
     command: [
@@ -306,7 +306,7 @@ services:
     depends_on:
       - iris_server1
       - iris_server2
-    restart: always
+    restart: unless-stopped 
 
   mediamtx:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:latest

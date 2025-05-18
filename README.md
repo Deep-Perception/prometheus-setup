@@ -12,7 +12,7 @@
 ## Initial Setup on clean Ubuntu 22.04 or 24.04 LTS Desktop Installation
 
 1. Clone this repo on to the target machine
-2. Run `setup/setup.sh` and reboot when prompted
+2. Run `setup/setup.sh` and reboot when prompted. To force the use of the Hailo-10 4G driver, run `setup/setup.sh H10-Driver=4G` 
 
 ## Running the Software
 

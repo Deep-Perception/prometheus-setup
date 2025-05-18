@@ -17,6 +17,12 @@ for arg in "$@"; do
   esac
 done
 
+#Stop all running containers
+docker stop $(docker ps -q)
+
+#Clear out all existing docker containers and volumes
+docker system prune --all --force && docker volume prune --all --force
+
 #Update system
 sudo apt-get update -y
 sudo apt-get upgrade -y

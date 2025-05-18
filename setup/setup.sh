@@ -48,7 +48,7 @@ sudo usermod -aG docker $USER
 #
 #Install Chrome
 #
-curl -O -z google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+curl -O -L google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt install ./google-chrome-stable_current_amd64.deb -y
 
 #

@@ -172,9 +172,4 @@ sudo udevadm trigger
 # Remove downloaded debs
 rm *.deb
 
-# Pull containers
-{
-	cd .. && docker compose pull
-}
-
 echo -e "\n\nReboot Needed to Complete Hailo Driver Install!!!\n\n"

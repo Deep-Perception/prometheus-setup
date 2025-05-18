@@ -35,6 +35,7 @@ services:
     ]
     depends_on:
       - iris_router
+      - dp-envoy
     volumes:
       - hp-config-cache:/tmp/snapshots
       - /tmp/logs:/tmp/logs
@@ -57,7 +58,7 @@ services:
       -logtostderr
     ]
     environment:
-      - MAX_CAMERA_NUM=8
+      - MAX_CAMERA_NUM=32
       - DB_PASSWORD=postgres
       - DB_USER=postgres
       - DB_NAME=dp_db
@@ -103,9 +104,9 @@ services:
     ]
     depends_on:
       - iris_server1
-      - iris_server
+      - iris_server2
 
-  iris_server:
+  iris_server1:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
     privileged: true
@@ -113,10 +114,6 @@ services:
       --grpc_port=50056
     ]
     environment:
-      - EVENTS_SERVER_HOST=0.0.0.0
-      # TODO(chris): added for X11
-      - DISPLAY=$DISPLAY
-      # - GST_DEBUG=*:4
       - HAILO_MONITOR=1
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
@@ -127,8 +124,6 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      # FPS for CPU mode. Default is 10 FPS if not specified
-      - IRIS_CPU_FPS=12
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=1
       - NO_EVENT_SEND=true
@@ -161,8 +156,10 @@ services:
     restart: always
     depends_on:
       - webrtc
+      - mediamtx
+      - hailo_service
 
-  iris_server1:
+  iris_server2:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
     privileged: true
@@ -170,10 +167,6 @@ services:
       --grpc_port=50057
     ]
     environment:
-      - EVENTS_SERVER_HOST=0.0.0.0
-      # TODO(chris): added for X11
-      - DISPLAY=$DISPLAY
-      # - GST_DEBUG=*:4
       - HAILO_MONITOR=1
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
@@ -184,8 +177,6 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      # FPS for CPU mode. Default is 10 FPS if not specified
-      - IRIS_CPU_FPS=12
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=2
       - NO_EVENT_SEND=true
@@ -256,7 +247,6 @@ services:
       -logtostderr
     ]
     
-  # Metrics and monitoring part of the deployment
   influxdb:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/influxdb:latest
     environment:
@@ -273,8 +263,8 @@ services:
   telegraf:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:latest
     privileged: true
-    depends_on:
-      - influxdb
+    # depends_on:
+    #   - influxdb
     volumes:
       # Mount RAPL directory
       - /sys/class/powercap:/sys/class/powercap:ro
@@ -297,8 +287,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
       - "3000:3000"
-    depends_on:
-      - influxdb
+    # depends_on:
+    #   - influxdb
     #volumes:
     #  - grafana-data:/var/lib/grafana:rw
 
@@ -315,6 +305,7 @@ services:
       - /dev:/dev
     depends_on:
       - iris_server1
+      - iris_server2
     restart: always
 
   mediamtx:

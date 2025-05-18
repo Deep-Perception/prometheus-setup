@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Default value
+H10_DRIVER_VERSION="8G"
+
+# Parse optional argument
+for arg in "$@"; do
+  case $arg in
+    H10-Driver=*)
+      H10_DRIVER_VERSION="${arg#*=}"
+      if [[ "$H10_DRIVER_VERSION" != "4G" && "$H10_DRIVER_VERSION" != "8G" ]]; then
+        echo "Invalid H10-Driver value: $H10_DRIVER_VERSION"
+        echo "Allowed values: 4G, 8G (default)"
+        exit 1
+      fi
+      ;;
+  esac
+done
+
 #Update system
 sudo apt-get update -y
 sudo apt-get upgrade -y
@@ -100,8 +117,12 @@ if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     curl -O -z hailort-pcie-driver_4.21.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
-    curl -O -z 2280-hailo10h-driver-fw_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
-    yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
+    if [[ "H10_DRIVER_VERSION" == "4G" ]]; then
+	echo -e "\n\nWaiting for 4G Driver from Hailo, exiting!!!\n\n"
+ 	exit 1
+    else
+    	curl -O -z 2280-hailo10h-driver-fw_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
+    	yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
 else
     echo "Supported Hailo configuration not found, skipping driver install"
 fi

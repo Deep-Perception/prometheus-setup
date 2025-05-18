@@ -17,11 +17,18 @@ for arg in "$@"; do
   esac
 done
 
-#Stop all running containers
-docker stop $(docker ps -q)
+#Cleanup Previous Install
+if command -v docker &> /dev/null; then
+   containers=$(sudo docker ps -q)
+   
+   if [ -n "$containers" ]; then
+     sudo docker stop $containers
+   fi
+   
+   sudo docker system prune --all --force
+   sudo docker volume prune --all --force
 
-#Clear out all existing docker containers and volumes
-docker system prune --all --force && docker volume prune --all --force
+fi
 
 #Update system
 sudo apt-get update -y

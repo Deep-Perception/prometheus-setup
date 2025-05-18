@@ -65,7 +65,7 @@ sudo usermod -aG docker $USER
 #
 #Install Chrome
 #
-curl -fsSL google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+curl -fsSLO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i ./google-chrome-stable_current_amd64.deb
 sudo apt-get install -f -y
 
@@ -115,14 +115,14 @@ done
 
 # Install appropriate driver
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
-    curl -fsSL hailort-pcie-driver_4.21.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
+    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     if [[ "$H10_DRIVER_VERSION" == "4G" ]]; then
 	echo -e "\n\nWaiting for 4G Driver from Hailo, exiting!!!\n\n"
  	exit 1
     else
-    	curl -fsSL 2280-hailo10h-driver-fw_4.22.0_all.deb https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
+    	curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
     	yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
     fi
 else

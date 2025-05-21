@@ -18,8 +18,8 @@
 
 ## Running the Software
 
-1. Run start.sh to start the demo software
-2. Run stop.sh to stop the demo software
+1. From the `prometheus-setup` directory, `run.sh` to start the demo software
+2. From the `prometheus-setup` directory, `stop.sh` to stop the demo software
 3. Open Chrome and navigate to http://localhost:8082 if running locally or use the IP address and port 8082 of the remote machine. (F11 can be used to put Chrome into full screen kiosk mode)
 4. Add any combination of camera sources or video loops.
 - 1 Hailo: 4 Sources

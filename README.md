@@ -12,8 +12,9 @@
 
 ## Initial Setup on clean Ubuntu 22.04 or 24.04 LTS Desktop Installation
 
-1. Clone this repo on to the target machine
-2. cd into the setup directory and run `./setup.sh`. Reboot when prompted. To force the use of the Hailo-10 4G driver, run `setup.sh H10-Driver=4G` 
+1. Clone this repo on to the target machine `git clone https://github.com/Deep-Perception/prometheus-setup.git`
+2. Navigate to the setup script folder `cd prometheus-setup/setup`
+3. Run `./setup.sh`. Reboot when prompted. To force the use of the Hailo-10 4G driver, run `setup.sh H10-Driver=4G` 
 
 ## Running the Software
 

@@ -14,9 +14,9 @@
 
 1. Clone this repo on to the target machine `git clone https://github.com/Deep-Perception/prometheus-setup.git`
 2. Navigate to the setup script folder `cd prometheus-setup/setup`
-3. Run `./setup.sh` and reboot when prompted. By default, the Hailo-10 8G driver will be installed. To force the use of the Hailo-10 4G driver, run `./setup.sh H10-Driver=4G`
+3. Run `./setup.sh` and reboot when prompted.
 
-If you change the number of Hailo accelerators in the system or switch between the Hailo-8, Hailo-10 4G and Hailo-10 8G accelerators, you need to re-run the `setup.sh` script.
+If you change the number of Hailo accelerators in the system or switch between Hailo-8 and Hailo-10 accelerators, you must re-run the `setup.sh` script.
 
 ## Running the Software
 

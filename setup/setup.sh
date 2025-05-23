@@ -1,23 +1,7 @@
 #!/bin/bash
 
-# Default value
-H10_DRIVER_VERSION="8G"
-
-# Parse optional argument
-for arg in "$@"; do
-  case $arg in
-    H10-Driver=*)
-      H10_DRIVER_VERSION="${arg#*=}"
-      if [[ "$H10_DRIVER_VERSION" != "4G" && "$H10_DRIVER_VERSION" != "8G" ]]; then
-        echo "Invalid H10-Driver value: $H10_DRIVER_VERSION"
-        echo "Allowed values: 4G, 8G (default)"
-        exit 1
-      fi
-      ;;
-  esac
-done
-
 #Cleanup Previous Install
+echo -e "\n\nCleaning up existing containers, this may take a while!\n\n"
 if command -v docker &> /dev/null; then
    containers=$(sudo docker ps -q)
    
@@ -131,15 +115,10 @@ if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
-    if [[ "$H10_DRIVER_VERSION" == "4G" ]]; then
-	echo -e "\n\nWaiting for 4G Driver from Hailo, exiting!!!\n\n"
- 	exit 1
-    else
-    	curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/2280-hailo10h-driver-fw_4.22.0_all.deb 
-    	yes | sudo dpkg -i 2280-hailo10h-driver-fw_4.22.0_all.deb
-    fi
+    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/hailo10-m2-4gb-driver-fw_5.0.0_all.deb
+    yes | sudo dpkg -i hailo10-m2-4gb-driver-fw_5.0.0_all.deb
 else
-    echo -e "\n\nSupported Hailo configuration not found, skipping driver install\n\n"
+    echo -e "\n\nSupported Hailo configuration not found, skipping driver install and exiting\n\n"
     exit 1
 fi
 
@@ -162,7 +141,7 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     if [[ "$hailo10_count" -eq 1 ]]; then
             cp docker-compose.1hailo.yaml ../docker-compose.yaml
 #   elif [[ "$hailo10_count" -eq 2 ]]; then
-#           cp docker-compose.2hailo.yaml ../docker-compose.yaml
+#            cp docker-compose.2hailo.yaml ../docker-compose.yaml
 #   elif [[ "$hailo10_count" -eq 4 ]]; then
 #            cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else

@@ -6,7 +6,7 @@
 2. High core count CPU (i5 or better) to run 2 and 4 Hailo configurations. 
 3. 1,2 or 4 Hailo-8 or a single Hailo-10H AI accelerators (Our scripts will install the kernel modules version, do not manually install the driver beforehand).
 4. **Required to use setup script: Disable Secure Boot** in the BIOS or Hailo kernel module will not load.
-5. **A sufficient thermal solution for the Hailo accelerators must be in place or choppy video will occur**  
+5. **A sufficient thermal solution for the Hailo accelerators must be in place or choppy video will occur and/or the Hailo will lock up until the system is rebooted**  
 6. Optional: Video sources consisting of any combination of ONVIF cameras, direct RTSP links and directly attached USB cameras. 1920x1080 10FPS sources preferred. Demo loop vidoes are included and may be used as an alternative or in combination with live sources.
 7. System that supports VA-API h264 encode and decode (Most Intel and AMD integrated and discrete graphics cards supported).
 

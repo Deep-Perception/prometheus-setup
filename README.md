@@ -1,5 +1,11 @@
 # Setup for Prometheus Software
 
+## Demo and Config Videos: 
+
+Demo Video: https://www.youtube.com/watch?v=WLws3rbnVts
+
+Adding Built in Video Loops: https://www.youtube.com/watch?v=Nx5h7YJvKHI
+
 ## System Requirements:
 
 1. Ubuntu 22.04 or 24.04 LTS Desktop. Note Arrow Lake systems need 24.04 LTS.

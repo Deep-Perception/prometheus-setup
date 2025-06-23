@@ -115,8 +115,8 @@ if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
-    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/hailo10-m2-4gb-driver-fw_5.0.0_all.deb
-    yes | sudo dpkg -i hailo10-m2-4gb-driver-fw_5.0.0_all.deb
+    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/hailo10h-driver-fw_5.0.0_all.deb
+    yes | sudo dpkg -i hailo10h-driver-fw_5.0.0_all.deb
 else
     echo -e "\n\nSupported Hailo configuration not found, skipping driver install and exiting\n\n"
     exit 1

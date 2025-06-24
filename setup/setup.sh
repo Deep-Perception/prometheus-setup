@@ -140,10 +140,10 @@ elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     echo "HAILO_ARCH=h10" > ../.env
     if [[ "$hailo10_count" -eq 1 ]]; then
             cp docker-compose.1hailo.yaml ../docker-compose.yaml
-#   elif [[ "$hailo10_count" -eq 2 ]]; then
-#            cp docker-compose.2hailo.yaml ../docker-compose.yaml
-#   elif [[ "$hailo10_count" -eq 4 ]]; then
-#            cp docker-compose.4hailo.yaml ../docker-compose.yaml
+    elif [[ "$hailo10_count" -eq 2 ]]; then
+             cp docker-compose.2hailo.yaml ../docker-compose.yaml
+    elif [[ "$hailo10_count" -eq 4 ]]; then
+             cp docker-compose.4hailo.yaml ../docker-compose.yaml
     else
             echo -e "\n\nHailo-10: $hailo10_count devices not supported\n\n"
 	    exit 1

@@ -59,14 +59,6 @@ services:
       # NOTE: the mounted location needs to match --cache_dir
       - edge-config-cache:/tmp/cache
     restart: always
-  # hailo_service:
-  #   image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:latest
-  #   network_mode: host
-  #   privileged: true
-  #   environment:
-  #     - HAILO_MONITOR=1
-  #   volumes:
-  #     - /tmp/hmon_files:/tmp/hmon_files
   usb_cameras:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/usb-cameras:latest
     privileged: true

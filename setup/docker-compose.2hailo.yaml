@@ -114,7 +114,6 @@ services:
     restart: always
     depends_on:
       - webrtc
-      - hailo_service
   iris_server2:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
@@ -150,7 +149,6 @@ services:
     restart: always
     depends_on:
       - webrtc
-      - hailo_service
   dp-envoy:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:latest
     ports:

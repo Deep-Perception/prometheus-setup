@@ -7,10 +7,15 @@ mkdir -p $OUTPUT_DIR
 # Path to the docker-compose.yaml file
 DOCKER_COMPOSE_FILE="../docker-compose.yaml"
 
-# Function to extract images from docker-compose.yaml
+ENV_FILE="../.env"
+if [[ -f "$ENV_FILE" ]]; then
+  echo "Loading environment variables from $ENV_FILE"
+  export $(grep -v '^#' "$ENV_FILE" | xargs)
+fi
+
+# Then modify extract_images to use envsubst
 extract_images() {
-  # Use yq or awk/sed to parse docker-compose.yaml for the "image:" lines
-  grep "image:" $DOCKER_COMPOSE_FILE | awk '{print $2}' | sort -u
+  grep "image:" "$DOCKER_COMPOSE_FILE" | awk '{print $2}' | envsubst | sort -u
 }
 
 # Check if the docker-compose.yaml file exists

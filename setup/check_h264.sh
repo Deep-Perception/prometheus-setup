@@ -152,12 +152,12 @@ check_nvdec_support() {
     local nvdec_supported=0
     
     # Method 1: Check for NVDEC library
-    if ls /usr/lib/x86_64-linux-gnu/libnvcuvid.so* >/dev/null 2>&1 || \
-       ls /usr/lib64/libnvcuvid.so* >/dev/null 2>&1 || \
-       ls /usr/local/cuda/lib64/libnvcuvid.so* >/dev/null 2>&1; then
-        print_status "SUCCESS" "NVDEC library (libnvcuvid) found"
-        nvdec_supported=1
-    fi
+    #if ls /usr/lib/x86_64-linux-gnu/libnvcuvid.so* >/dev/null 2>&1 || \
+    #   ls /usr/lib64/libnvcuvid.so* >/dev/null 2>&1 || \
+    #   ls /usr/local/cuda/lib64/libnvcuvid.so* >/dev/null 2>&1; then
+    #    print_status "SUCCESS" "NVDEC library (libnvcuvid) found"
+    #    nvdec_supported=1
+    #fi
     
     # Method 2: Try nvidia-smi decoder query (newer drivers)
     if command_exists nvidia-smi; then
@@ -216,12 +216,12 @@ check_nvenc_support() {
     local nvenc_supported=0
     
     # Method 1: Check for NVENC library
-    if ls /usr/lib/x86_64-linux-gnu/libnvidia-encode.so* >/dev/null 2>&1 || \
-       ls /usr/lib64/libnvidia-encode.so* >/dev/null 2>&1 || \
-       ls /usr/local/cuda/lib64/libnvidia-encode.so* >/dev/null 2>&1; then
-        print_status "SUCCESS" "NVENC library (libnvidia-encode) found"
-        nvenc_supported=1
-    fi
+    #if ls /usr/lib/x86_64-linux-gnu/libnvidia-encode.so* >/dev/null 2>&1 || \
+    #   ls /usr/lib64/libnvidia-encode.so* >/dev/null 2>&1 || \
+    #   ls /usr/local/cuda/lib64/libnvidia-encode.so* >/dev/null 2>&1; then
+    #    print_status "SUCCESS" "NVENC library (libnvidia-encode) found"
+    #    nvenc_supported=1
+    #fi
     
     # Method 2: Try nvidia-smi encoder query (newer drivers)
     if command_exists nvidia-smi; then

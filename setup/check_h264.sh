@@ -159,38 +159,27 @@ check_nvdec_support() {
     #    nvdec_supported=1
     #fi
     
-    # Method 2: Try nvidia-smi decoder query (newer drivers)
-    if command_exists nvidia-smi; then
-        local decoder_info
-        decoder_info=$(nvidia-smi --query-gpu=decoder.util --format=csv,noheader,nounits 2>/dev/null)
-        
-        if [ -n "$decoder_info" ] && [ "$decoder_info" != "[Not Supported]" ]; then
-            print_status "SUCCESS" "NVDEC supported (nvidia-smi query successful)"
-            nvdec_supported=1
-        fi
-        
-        # Method 3: Check GPU generation (fallback)
-        local gpu_name
-        gpu_name=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits | head -1)
-        
-        if [ -n "$gpu_name" ]; then
-            # NVDEC is supported on Maxwell (GTX 9xx) and newer
-            case "$gpu_name" in
-                *"GTX 9"*|*"GTX 10"*|*"GTX 16"*|*"RTX"*|*"Tesla"*|*"Quadro"*|*"A100"*|*"A40"*|*"A30"*|*"A10"*|*"T4"*)
-                    print_status "SUCCESS" "NVDEC supported (GPU: $gpu_name)"
+    # Method 3: Check GPU generation (fallback)
+    local gpu_name
+    gpu_name=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits | head -1)
+   
+    if [ -n "$gpu_name" ]; then
+        # NVDEC is supported on Maxwell (GTX 9xx) and newer
+        case "$gpu_name" in
+            *"GTX 9"*|*"GTX 10"*|*"GTX 16"*|*"RTX"*|*"Tesla"*|*"Quadro"*|*"A100"*|*"A40"*|*"A30"*|*"A10"*|*"T4"*)
+                print_status "SUCCESS" "NVDEC supported (GPU: $gpu_name)"
+                nvdec_supported=1
+                ;;
+            *)
+                # Check if it's a newer architecture we might not know about
+                local compute_cap
+                compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1 2>/dev/null)
+                if [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 5 ]; then
+                    print_status "SUCCESS" "NVDEC likely supported (compute capability $compute_cap >= 5.0)"
                     nvdec_supported=1
-                    ;;
-                *)
-                    # Check if it's a newer architecture we might not know about
-                    local compute_cap
-                    compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1 2>/dev/null)
-                    if [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 5 ]; then
-                        print_status "SUCCESS" "NVDEC likely supported (compute capability $compute_cap >= 5.0)"
-                        nvdec_supported=1
-                    fi
-                    ;;
-            esac
-        fi
+                fi
+                ;;
+        esac
     fi
     
     # Method 4: Check with ffmpeg if available

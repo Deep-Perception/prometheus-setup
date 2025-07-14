@@ -22,7 +22,7 @@ echo "🚀 Launching 16 concurrent H.264 NVENC encoding jobs..."
 # Launch 16 FFmpeg encode jobs using testsrc
 for i in $(seq 0 15); do
   ffmpeg -f lavfi -i testsrc=size=1920x1080:rate=10 \
-    -c:v h264_nvenc -preset fast -b:v 2M -t 120 out$i.mp4 \
+    -c:v h264_nvenc -preset fast -t 120 out$i.mp4 \
     > log$i.txt 2>&1 &
 done
 

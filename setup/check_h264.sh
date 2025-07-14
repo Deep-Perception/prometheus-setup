@@ -149,29 +149,62 @@ check_nvidia_gpu() {
 check_nvdec_support() {
     print_status "INFO" "Checking NVDEC (NVIDIA decode) support..."
     
-    # Check for NVIDIA GPU compute capability (NVDEC requires Maxwell or newer)
+    local nvdec_supported=0
+    
+    # Method 1: Check for NVDEC library
+    if ls /usr/lib/x86_64-linux-gnu/libnvcuvid.so* >/dev/null 2>&1 || \
+       ls /usr/lib64/libnvcuvid.so* >/dev/null 2>&1 || \
+       ls /usr/local/cuda/lib64/libnvcuvid.so* >/dev/null 2>&1; then
+        print_status "SUCCESS" "NVDEC library (libnvcuvid) found"
+        nvdec_supported=1
+    fi
+    
+    # Method 2: Try nvidia-smi decoder query (newer drivers)
     if command_exists nvidia-smi; then
-        local compute_cap
-        compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1)
+        local decoder_info
+        decoder_info=$(nvidia-smi --query-gpu=decoder.util --format=csv,noheader,nounits 2>/dev/null)
         
-        if [ -n "$compute_cap" ]; then
-            # NVDEC is available on Maxwell (5.0) and newer
-            if command_exists bc && [ "$(echo "$compute_cap >= 5.0" | bc -l 2>/dev/null)" = "1" ] 2>/dev/null; then
-                print_status "SUCCESS" "NVDEC supported (compute capability $compute_cap >= 5.0)"
-                return 0
-            elif [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 5 ]; then
-                print_status "SUCCESS" "NVDEC supported (compute capability $compute_cap >= 5.0)"
-                return 0
-            else
-                print_status "ERROR" "NVDEC not supported (compute capability $compute_cap < 5.0)"
-                return 1
-            fi
-        else
-            print_status "WARNING" "Could not determine GPU compute capability"
-            return 1
+        if [ -n "$decoder_info" ] && [ "$decoder_info" != "[Not Supported]" ]; then
+            print_status "SUCCESS" "NVDEC supported (nvidia-smi query successful)"
+            nvdec_supported=1
         fi
+        
+        # Method 3: Check GPU generation (fallback)
+        local gpu_name
+        gpu_name=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits | head -1)
+        
+        if [ -n "$gpu_name" ]; then
+            # NVDEC is supported on Maxwell (GTX 9xx) and newer
+            case "$gpu_name" in
+                *"GTX 9"*|*"GTX 10"*|*"GTX 16"*|*"RTX"*|*"Tesla"*|*"Quadro"*|*"A100"*|*"A40"*|*"A30"*|*"A10"*|*"T4"*)
+                    print_status "SUCCESS" "NVDEC supported (GPU: $gpu_name)"
+                    nvdec_supported=1
+                    ;;
+                *)
+                    # Check if it's a newer architecture we might not know about
+                    local compute_cap
+                    compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1 2>/dev/null)
+                    if [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 5 ]; then
+                        print_status "SUCCESS" "NVDEC likely supported (compute capability $compute_cap >= 5.0)"
+                        nvdec_supported=1
+                    fi
+                    ;;
+            esac
+        fi
+    fi
+    
+    # Method 4: Check with ffmpeg if available
+    if [ $nvdec_supported -eq 0 ] && command_exists ffmpeg; then
+        if ffmpeg -decoders 2>/dev/null | grep -q "h264_cuvid"; then
+            print_status "SUCCESS" "NVDEC supported (FFmpeg h264_cuvid decoder available)"
+            nvdec_supported=1
+        fi
+    fi
+    
+    if [ $nvdec_supported -eq 1 ]; then
+        return 0
     else
-        print_status "ERROR" "nvidia-smi not available"
+        print_status "ERROR" "NVDEC not supported or not properly installed"
         return 1
     fi
 }
@@ -180,29 +213,70 @@ check_nvdec_support() {
 check_nvenc_support() {
     print_status "INFO" "Checking NVENC (NVIDIA encode) support..."
     
-    # Check for NVIDIA GPU compute capability (NVENC requires Kepler or newer)
+    local nvenc_supported=0
+    
+    # Method 1: Check for NVENC library
+    if ls /usr/lib/x86_64-linux-gnu/libnvidia-encode.so* >/dev/null 2>&1 || \
+       ls /usr/lib64/libnvidia-encode.so* >/dev/null 2>&1 || \
+       ls /usr/local/cuda/lib64/libnvidia-encode.so* >/dev/null 2>&1; then
+        print_status "SUCCESS" "NVENC library (libnvidia-encode) found"
+        nvenc_supported=1
+    fi
+    
+    # Method 2: Try nvidia-smi encoder query (newer drivers)
     if command_exists nvidia-smi; then
-        local compute_cap
-        compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1)
+        local encoder_info
+        encoder_info=$(nvidia-smi --query-gpu=encoder.stats.sessionCount --format=csv,noheader,nounits 2>/dev/null)
         
-        if [ -n "$compute_cap" ]; then
-            # NVENC is available on Kepler (3.0) and newer
-            if command_exists bc && [ "$(echo "$compute_cap >= 3.0" | bc -l 2>/dev/null)" = "1" ] 2>/dev/null; then
-                print_status "SUCCESS" "NVENC supported (compute capability $compute_cap >= 3.0)"
-                return 0
-            elif [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 3 ]; then
-                print_status "SUCCESS" "NVENC supported (compute capability $compute_cap >= 3.0)"
-                return 0
-            else
-                print_status "ERROR" "NVENC not supported (compute capability $compute_cap < 3.0)"
-                return 1
-            fi
-        else
-            print_status "WARNING" "Could not determine GPU compute capability"
-            return 1
+        if [ -n "$encoder_info" ] && [ "$encoder_info" != "[Not Supported]" ]; then
+            print_status "SUCCESS" "NVENC supported (nvidia-smi query successful)"
+            nvenc_supported=1
         fi
+        
+        # Method 3: Check GPU generation (fallback)
+        local gpu_name
+        gpu_name=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits | head -1)
+        
+        if [ -n "$gpu_name" ]; then
+            # NVENC is supported on Kepler (GTX 6xx/7xx) and newer
+            case "$gpu_name" in
+                *"GTX 6"*|*"GTX 7"*|*"GTX 9"*|*"GTX 10"*|*"GTX 16"*|*"RTX"*|*"Tesla"*|*"Quadro"*|*"A100"*|*"A40"*|*"A30"*|*"A10"*|*"T4"*)
+                    print_status "SUCCESS" "NVENC supported (GPU: $gpu_name)"
+                    nvenc_supported=1
+                    ;;
+                *)
+                    # Check if it's a newer architecture we might not know about
+                    local compute_cap
+                    compute_cap=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader,nounits | head -1 2>/dev/null)
+                    if [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 3 ]; then
+                        print_status "SUCCESS" "NVENC likely supported (compute capability $compute_cap >= 3.0)"
+                        nvenc_supported=1
+                    fi
+                    ;;
+            esac
+        fi
+    fi
+    
+    # Method 4: Check with ffmpeg if available
+    if [ $nvenc_supported -eq 0 ] && command_exists ffmpeg; then
+        if ffmpeg -encoders 2>/dev/null | grep -q "h264_nvenc"; then
+            print_status "SUCCESS" "NVENC supported (FFmpeg h264_nvenc encoder available)"
+            nvenc_supported=1
+        fi
+    fi
+    
+    # Method 5: Check session limit (indicates NVENC presence)
+    if [ $nvenc_supported -eq 0 ] && command_exists nvidia-smi; then
+        if nvidia-smi -h 2>&1 | grep -q "encoder.stats"; then
+            print_status "INFO" "NVENC encoder stats available in nvidia-smi"
+            nvenc_supported=1
+        fi
+    fi
+    
+    if [ $nvenc_supported -eq 1 ]; then
+        return 0
     else
-        print_status "ERROR" "nvidia-smi not available"
+        print_status "ERROR" "NVENC not supported or not properly installed"
         return 1
     fi
 }
@@ -228,27 +302,46 @@ check_nvidia_capabilities() {
         return 1
     fi
     
-    # Get GPU compute capability and memory
+    # Get GPU information
     local gpu_info
-    gpu_info=$(nvidia-smi --query-gpu=name,compute_cap,memory.total --format=csv,noheader,nounits)
+    gpu_info=$(nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader,nounits)
     
     if [ -n "$gpu_info" ]; then
         print_status "INFO" "GPU Information:"
-        echo "$gpu_info" | while IFS=, read -r name compute_cap memory; do
+        echo "$gpu_info" | while IFS=, read -r name driver_version memory; do
             echo "  Name: $name"
-            echo "  Compute Capability: $compute_cap"
+            echo "  Driver Version: $driver_version"
             echo "  Memory: ${memory} MB"
-            
-            # Check if GPU supports hardware encoding (requires compute capability >= 3.0)
-            if command_exists bc && [ "$(echo "$compute_cap >= 3.0" | bc -l 2>/dev/null)" = "1" ] 2>/dev/null; then
-                print_status "SUCCESS" "GPU supports hardware encoding (compute capability >= 3.0)"
-            elif [ -n "$compute_cap" ] && [ "$(echo "$compute_cap" | cut -d. -f1)" -ge 3 ]; then
-                print_status "SUCCESS" "GPU supports hardware encoding (compute capability >= 3.0)"
-            else
-                print_status "WARNING" "GPU may not support hardware encoding (compute capability < 3.0)"
+        done
+        echo
+        
+        # Try to query encoder/decoder capabilities (newer drivers)
+        print_status "INFO" "Checking video codec capabilities..."
+        
+        # List NVENC/NVDEC libraries if present
+        print_status "INFO" "Checking for Video Codec SDK libraries..."
+        local libs_found=0
+        
+        for lib_path in /usr/lib/x86_64-linux-gnu /usr/lib64 /usr/local/cuda/lib64; do
+            if [ -d "$lib_path" ]; then
+                if ls "$lib_path"/libnvidia-encode.so* >/dev/null 2>&1; then
+                    print_status "SUCCESS" "  NVENC library found in $lib_path"
+                    libs_found=1
+                fi
+                if ls "$lib_path"/libnvcuvid.so* >/dev/null 2>&1; then
+                    print_status "SUCCESS" "  NVDEC library found in $lib_path"
+                    libs_found=1
+                fi
             fi
         done
+        
+        if [ $libs_found -eq 0 ]; then
+            print_status "WARNING" "  No Video Codec SDK libraries found"
+            print_status "INFO" "  This may indicate incomplete driver installation"
+        fi
     fi
+    
+    return 0
 }
 
 # Function to identify GPU type for each DRM device

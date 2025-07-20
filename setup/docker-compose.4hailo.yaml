@@ -23,6 +23,7 @@ services:
       retries: 5
     volumes:
       - db:/var/lib/postgresql/data
+    restart: unless-stopped
   hp_config:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config-${HAILO_ARCH}:latest
     ports:
@@ -30,15 +31,16 @@ services:
     command: [-logtostderr]
     depends_on:
       - iris_router
-      - dp-envoy
+      - edge_config
     volumes:
       - hp-config-cache:/tmp/snapshots
       - /tmp/logs:/tmp/logs
-    restart: always
+    restart: unless-stopped
   turn_server:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/turn-server:latest
     network_mode: host
     command: [-logtostderr]
+    restart: unless-stopped
   edge_config:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:latest
     depends_on:
@@ -46,7 +48,7 @@ services:
       - iris_router
     command: [--json_db_file=/data/event_templates.json, --cache_dir=/tmp/cache, -logtostderr]
     environment:
-      - MAX_CAMERA_NUM=32
+      - MAX_CAMERA_NUM=8
       - DB_PASSWORD=postgres
       - DB_USER=postgres
       - DB_NAME=dp_db
@@ -59,7 +61,7 @@ services:
     volumes:
       # NOTE: the mounted location needs to match --cache_dir
       - edge-config-cache:/tmp/cache
-    restart: always
+    restart: unless-stopped
   usb_cameras:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/usb-cameras:latest
     privileged: true
@@ -68,19 +70,20 @@ services:
     volumes:
       - /dev/v4l/by-id:/dev/v4l/by-id
     command: [-logtostderr]
-    restart: always
+    restart: unless-stopped
   iris_router:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-router:latest
     ports:
       - "50052:50052"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    command: ["--backends=host.docker.internal:50056,host.docker.internal:50057,host.docker.internal:50058,host.docker.internal:50059", "-logtostderr"]
+    command: ["--backends=host.docker.internal:50056,host.docker.internal:50057", "-logtostderr"]
     depends_on:
       - iris_server1
       - iris_server2
       - iris_server3
       - iris_server4
+    restart: unless-stopped
   iris_server1:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
@@ -88,7 +91,9 @@ services:
     command: [--grpc_port=50056]
     environment:
       - HAILO_MONITOR=1
-      # - GST_DEBUG=*:4
+      # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
+      # will be forced to use the second choice -- GPU if available, or software.
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -98,13 +103,14 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=1
       - NO_EVENT_SEND=true
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      # Integer value for source FPS, defaulta to 10
+      # - SOURCE_FPS=10
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
-      # - /dev/hailo1:/dev/hailo1
       - /dev/bus/usb:/dev/bus/usb
       # TODO(chris): added for X11
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -115,10 +121,10 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - webrtc
-      - mediamtx
+  
   iris_server2:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
@@ -126,7 +132,9 @@ services:
     command: [--grpc_port=50057]
     environment:
       - HAILO_MONITOR=1
-      # - GST_DEBUG=*:4
+      # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
+      # will be forced to use the second choice -- GPU if available, or software.
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -136,12 +144,14 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=2
       - NO_EVENT_SEND=true
+      # Integer value for source FPS, defaulta to 10
+      # - SOURCE_FPS=10
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
+      - /dev/bus/usb:/dev/bus/usb
       - /tmp/hmon_files:/tmp/hmon_files
       - /dev/v4l/by-id:/dev/v4l/by-id
     group_add:
@@ -149,10 +159,9 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - webrtc
-      - mediamtx
   iris_server3:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
@@ -160,7 +169,9 @@ services:
     command: [--grpc_port=50058]
     environment:
       - HAILO_MONITOR=1
-      # - GST_DEBUG=*:4
+      # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
+      # will be forced to use the second choice -- GPU if available, or software.
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -170,16 +181,14 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=3
       - NO_EVENT_SEND=true
+      # Integer value for source FPS, defaulta to 10
+      # - SOURCE_FPS=10
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
-      # - /dev/hailo1:/dev/hailo1
       - /dev/bus/usb:/dev/bus/usb
-      # TODO(chris): added for X11
-      - /tmp/.X11-unix:/tmp/.X11-unix
       - /tmp/hmon_files:/tmp/hmon_files
       - /dev/v4l/by-id:/dev/v4l/by-id
     group_add:
@@ -187,10 +196,9 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - webrtc
-      - mediamtx
+      - webrtc  
   iris_server4:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
@@ -198,7 +206,9 @@ services:
     command: [--grpc_port=50059]
     environment:
       - HAILO_MONITOR=1
-      # - GST_DEBUG=*:4
+      # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
+      # will be forced to use the second choice -- GPU if available, or software.
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -208,16 +218,14 @@ services:
       # - Light blue: 34,177,227
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
-      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
       - HAILO_DEVICE_IDX=4
       - NO_EVENT_SEND=true
+      # Integer value for source FPS, defaulta to 10
+      # - SOURCE_FPS=10
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
-      # - /dev/hailo1:/dev/hailo1
       - /dev/bus/usb:/dev/bus/usb
-      # TODO(chris): added for X11
-      - /tmp/.X11-unix:/tmp/.X11-unix
       - /tmp/hmon_files:/tmp/hmon_files
       - /dev/v4l/by-id:/dev/v4l/by-id
     group_add:
@@ -225,10 +233,9 @@ services:
       - "110"
       - "44"
       - "46"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - webrtc
-      - mediamtx
   dp-envoy:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:latest
     ports:
@@ -243,6 +250,7 @@ services:
       - DP_HP_CONFIG_HOSTNAME=hp_config
     depends_on:
       - edge_config
+    restart: unless-stopped
   frontend:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/frontend:latest
     network_mode: host
@@ -253,14 +261,16 @@ services:
       - DP_WEBRTC_HOSTNAME=0.0.0.0
     depends_on:
       - dp-envoy
+    restart: unless-stopped
   webrtc:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/webrtc:latest
     ports:
       - "7777:7777"
-    restart: always
+    restart: unless-stopped 
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: [-logtostderr]
+  # Metrics and monitoring part of the deployment
   influxdb:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/influxdb:latest
     environment:
@@ -273,11 +283,12 @@ services:
       - "8086:8086"
     networks:
       - monitoring_net
+    restart: unless-stopped
   telegraf:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:latest
     privileged: true
-    # depends_on:
-    #   - influxdb
+    depends_on:
+      - influxdb
     volumes:
       # Mount RAPL directory
       - /sys/class/powercap:/sys/class/powercap:ro
@@ -292,6 +303,7 @@ services:
       - HOST_ROOT=/rootfs
     networks:
       - monitoring_net
+    restart: unless-stopped
   grafana:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/grafana-${HAILO_ARCH}:latest
     environment:
@@ -305,6 +317,7 @@ services:
       - grafana-data:/var/lib/grafana:rw
     networks:
       - monitoring_net
+    restart: unless-stopped
   hailo-monitor:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-monitor-${HAILO_ARCH}:latest
     # So hailo monitor files can be read from iris
@@ -318,7 +331,8 @@ services:
       - iris_server2
       - iris_server3
       - iris_server4
-    restart: always
+    restart: unless-stopped
   mediamtx:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:latest
     network_mode: host
+    restart: unless-stopped

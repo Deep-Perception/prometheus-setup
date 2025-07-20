@@ -31,7 +31,7 @@ services:
     command: [-logtostderr]
     depends_on:
       - iris_router
-      - dp-envoy
+      - edge_config
     volumes:
       - hp-config-cache:/tmp/snapshots
       - /tmp/logs:/tmp/logs
@@ -77,11 +77,12 @@ services:
       - "50052:50052"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    command: ["--backends=host.docker.internal:50056", "-logtostderr"]
+    command: ["--backends=host.docker.internal:50056,host.docker.internal:50057", "-logtostderr"]
     depends_on:
-      - iris_server
+      - iris_server1
+      - iris_server2
     restart: unless-stopped
-  iris_server:
+  iris_server1:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
     network_mode: host
     privileged: true
@@ -89,9 +90,8 @@ services:
     environment:
       - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
-      # will be forced to use the second choice -- GPU if available, or software. If the
-      # system does not have VAAPI, then we try to use the GPU, or fallback to
-      #- NO_VAAPI=true
+      # will be forced to use the second choice -- GPU if available, or software.
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -103,11 +103,13 @@ services:
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
       - HAILO_DEVICE_IDX=1
       - NO_EVENT_SEND=true
+      - NVIDIA_DRIVER_CAPABILITIES=all
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
+      - /dev/bus/usb:/dev/bus/usb
       # TODO(chris): added for X11
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /tmp/hmon_files:/tmp/hmon_files
@@ -120,6 +122,58 @@ services:
     restart: unless-stopped
     depends_on:
       - webrtc
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1 # alternatively, use `count: all` for all GPUs
+              capabilities: [gpu]
+  iris_server2:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    network_mode: host
+    privileged: true
+    command: [--grpc_port=50057]
+    environment:
+      - HAILO_MONITOR=1
+      # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
+      # will be forced to use the second choice -- GPU if available, or software.
+      - NO_VAAPI=true
+      # Colors for bounding box and text overlay on the visualizer stream.
+      # Depending on the demo environment, you may want to change the color to
+      # make the detections standout. Recommended values are:
+      # - Green: 0,255,0
+      # - White: 255,255,255
+      # - Red: 255,0,0
+      # - Light blue: 34,177,227
+      # - Dark blue: 50,67,128
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - IRIS_OVERLAY_COLOR_RGB=0,255,0
+      - HAILO_DEVICE_IDX=2
+      - NO_EVENT_SEND=true
+      # Integer value for source FPS, defaulta to 10
+      # - SOURCE_FPS=10
+    volumes:
+      - /dev/dri:/dev/dri
+      - /dev/:/dev/
+      - /dev/bus/usb:/dev/bus/usb
+      - /tmp/hmon_files:/tmp/hmon_files
+      - /dev/v4l/by-id:/dev/v4l/by-id
+    group_add:
+      - "109"
+      - "110"
+      - "44"
+      - "46"
+    restart: unless-stopped
+    depends_on:
+      - webrtc
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1 # alternatively, use `count: all` for all GPUs
+              capabilities: [gpu]
   dp-envoy:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:latest
     ports:
@@ -210,8 +264,10 @@ services:
       - /tmp/hmon_files:/tmp/hmon_files
       - /tmp/logs:/tmp/logs
       - /dev:/dev
+    depends_on:
+      - iris_server1
+      - iris_server2
     restart: unless-stopped
-  # Used to loading default streams for demo
   mediamtx:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:latest
     network_mode: host

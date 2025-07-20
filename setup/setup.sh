@@ -188,7 +188,7 @@ fi
 # Copy the right docker-compose.yaml file
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     echo "HAILO_ARCH=h8" > ../.env
-    echo "IMAGE_TAG=latest-h8" >> ../.env
+    echo "IMAGE_TAG=latest" >> ../.env
     if [[ "$hailo8_count" -eq 1 ]]; then
         if [[ "$NV_DETECTED" == "true" ]]; then
             cp docker-compose.1hailo.nv.yaml ../docker-compose.yaml

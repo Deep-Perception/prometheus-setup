@@ -115,38 +115,118 @@ if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h8/hailort-pcie-driver_4.21.0_all.deb 
     yes | sudo dpkg -i hailort-pcie-driver_4.21.0_all.deb
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
-    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/hailo10h-driver-fw_5.0.0_all.deb
-    yes | sudo dpkg -i hailo10h-driver-fw_5.0.0_all.deb
+    curl -fsSLO https://storage.googleapis.com/deepperception_public/hailo/h10/hailort-pcie-driver_5.0.0_all.deb
+    yes | sudo dpkg -i hailort-pcie-driver_5.0.0_all.deb 
 else
     echo -e "\n\nSupported Hailo configuration not found, skipping driver install and exiting\n\n"
     exit 1
 fi
 
-# Copy the right docker-compose.yaml file
+### Detected NVIDIA Card
 
+NV_DETECTED=false
+
+# Method 1: Check if nvidia-smi command is available and working
+if command -v nvidia-smi &> /dev/null; then
+    if nvidia-smi &> /dev/null; then
+        echo "NVIDIA GPU detected via nvidia-smi"
+        NV_DETECTED=true
+    fi
+fi
+
+# Method 2: Check lspci for NVIDIA devices (fallback)
+if [[ "$NV_DETECTED" == "false" ]]; then
+    if command -v lspci &> /dev/null; then
+        if lspci | grep -i nvidia &> /dev/null; then
+            echo "NVIDIA device detected via lspci"
+            NV_DETECTED=true
+        fi
+    fi
+fi
+
+# Method 3: Check /proc/driver/nvidia (another fallback)
+if [[ "$NV_DETECTED" == "false" ]]; then
+    if [[ -d /proc/driver/nvidia ]]; then
+        echo "NVIDIA driver detected in /proc/driver/nvidia"
+        NV_DETECTED=true
+    fi
+fi
+
+# Method 4: Check for NVIDIA kernel modules
+if [[ "$NV_DETECTED" == "false" ]]; then
+    if lsmod | grep -i nvidia &> /dev/null; then
+        echo "NVIDIA kernel module detected"
+        NV_DETECTED=true
+    fi
+fi
+
+#Install NVIDIA Container Runtime if NV Detected
+if [[ "$NV_DETECTED" == "true" ]]; then
+    echo "Installing NVIDIA Container Toolkit..."
+
+    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  	&& curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    
+    sudo apt-get update
+
+    export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.17.8-1
+    sudo apt-get install -y \
+      nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+fi
+
+# Copy the right docker-compose.yaml file
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     echo "HAILO_ARCH=h8" > ../.env
     if [[ "$hailo8_count" -eq 1 ]]; then
-	    cp docker-compose.1hailo.yaml ../docker-compose.yaml
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.1hailo.nv.yaml ../docker-compose.yaml
+        else
+            cp docker-compose.1hailo.yaml ../docker-compose.yaml
+        fi
     elif [[ "$hailo8_count" -eq 2 ]]; then
-	    cp docker-compose.2hailo.yaml ../docker-compose.yaml
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.2hailo.nv.yaml ../docker-compose.yaml
+        else
+            cp docker-compose.2hailo.yaml ../docker-compose.yaml
+        fi
     elif [[ "$hailo8_count" -eq 4 ]]; then
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.4hailo.nv.yaml ../docker-compose.yaml
+        else
             cp docker-compose.4hailo.yaml ../docker-compose.yaml
+        fi
     else
-	    echo -e "\n\nHailo-8: $hailo8_count devices not supported\n\n"
-	    exit 1
+        echo -e "\n\nHailo-8: $hailo8_count devices not supported\n\n"
+        exit 1
     fi
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     echo "HAILO_ARCH=h10" > ../.env
     if [[ "$hailo10_count" -eq 1 ]]; then
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.1hailo.nv.yaml ../docker-compose.yaml
+        else
             cp docker-compose.1hailo.yaml ../docker-compose.yaml
+        fi
     elif [[ "$hailo10_count" -eq 2 ]]; then
-             cp docker-compose.2hailo.yaml ../docker-compose.yaml
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.2hailo.nv.yaml ../docker-compose.yaml
+        else
+            cp docker-compose.2hailo.yaml ../docker-compose.yaml
+        fi
     elif [[ "$hailo10_count" -eq 4 ]]; then
-             cp docker-compose.4hailo.yaml ../docker-compose.yaml
+        if [[ "$NV_DETECTED" == "true" ]]; then
+            cp docker-compose.4hailo.nv.yaml ../docker-compose.yaml
+        else
+            cp docker-compose.4hailo.yaml ../docker-compose.yaml
+        fi
     else
-            echo -e "\n\nHailo-10: $hailo10_count devices not supported\n\n"
-	    exit 1
+        echo -e "\n\nHailo-10: $hailo10_count devices not supported\n\n"
+        exit 1
     fi
 fi
 

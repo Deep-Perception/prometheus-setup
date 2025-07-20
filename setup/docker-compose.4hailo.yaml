@@ -25,7 +25,7 @@ services:
       - db:/var/lib/postgresql/data
     restart: unless-stopped
   hp_config:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hp-config-${HAILO_ARCH}:${IMAGE_TAG}
     ports:
       - 50060:50060
     command: [-logtostderr]
@@ -37,12 +37,12 @@ services:
       - /tmp/logs:/tmp/logs
     restart: unless-stopped
   turn_server:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/turn-server:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/turn-server:${IMAGE_TAG}
     network_mode: host
     command: [-logtostderr]
     restart: unless-stopped
   edge_config:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:${IMAGE_TAG}
     depends_on:
       - db
       - iris_router
@@ -63,7 +63,7 @@ services:
       - edge-config-cache:/tmp/cache
     restart: unless-stopped
   usb_cameras:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/usb-cameras:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/usb-cameras:${IMAGE_TAG}
     privileged: true
     ports:
       - "50054:50054"
@@ -72,7 +72,7 @@ services:
     command: [-logtostderr]
     restart: unless-stopped
   iris_router:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-router:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-router:${IMAGE_TAG}
     ports:
       - "50052:50052"
     extra_hosts:
@@ -85,7 +85,7 @@ services:
       - iris_server4
     restart: unless-stopped
   iris_server1:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
     privileged: true
     command: [--grpc_port=50056]
@@ -126,7 +126,7 @@ services:
       - webrtc
   
   iris_server2:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
     privileged: true
     command: [--grpc_port=50057]
@@ -163,7 +163,7 @@ services:
     depends_on:
       - webrtc
   iris_server3:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
     privileged: true
     command: [--grpc_port=50058]
@@ -200,7 +200,7 @@ services:
     depends_on:
       - webrtc  
   iris_server4:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
     privileged: true
     command: [--grpc_port=50059]
@@ -237,7 +237,7 @@ services:
     depends_on:
       - webrtc
   dp-envoy:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:${IMAGE_TAG}
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -252,7 +252,7 @@ services:
       - edge_config
     restart: unless-stopped
   frontend:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/frontend:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/frontend:${IMAGE_TAG}
     network_mode: host
     ports:
       - "8082:8082"
@@ -263,7 +263,7 @@ services:
       - dp-envoy
     restart: unless-stopped
   webrtc:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/webrtc:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/webrtc:${IMAGE_TAG}
     ports:
       - "7777:7777"
     restart: unless-stopped 
@@ -272,7 +272,7 @@ services:
     command: [-logtostderr]
   # Metrics and monitoring part of the deployment
   influxdb:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/influxdb:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/influxdb:${IMAGE_TAG}
     environment:
       - INFLUXDB_DB=telegraf
       - INFLUXDB_ADMIN_USER=admin
@@ -285,7 +285,7 @@ services:
       - monitoring_net
     restart: unless-stopped
   telegraf:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:${IMAGE_TAG}
     privileged: true
     depends_on:
       - influxdb
@@ -305,7 +305,7 @@ services:
       - monitoring_net
     restart: unless-stopped
   grafana:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/grafana-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/grafana-${HAILO_ARCH}:${IMAGE_TAG}
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -319,7 +319,7 @@ services:
       - monitoring_net
     restart: unless-stopped
   hailo-monitor:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-monitor-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-monitor-${HAILO_ARCH}:${IMAGE_TAG}
     # So hailo monitor files can be read from iris
     privileged: true
     volumes:
@@ -333,6 +333,6 @@ services:
       - iris_server4
     restart: unless-stopped
   mediamtx:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/mediamtx:${IMAGE_TAG}
     network_mode: host
     restart: unless-stopped

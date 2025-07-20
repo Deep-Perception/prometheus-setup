@@ -93,7 +93,7 @@ services:
       - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
       # will be forced to use the second choice -- GPU if available, or software.
-      # - NO_VAAPI=true
+      - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:

@@ -14,7 +14,7 @@ Adding Built in Video Loops: https://www.youtube.com/watch?v=Nx5h7YJvKHI
 4. **Required to use setup script: Disable Secure Boot** in the BIOS or Hailo kernel module will not load.
 5. **A sufficient thermal solution for the Hailo accelerators must be in place or choppy video will occur and/or the Hailo will lock up until the system is rebooted.**  
 6. Optional: Video sources consisting of any combination of ONVIF cameras, direct RTSP links and directly attached USB cameras. 1920x1080 10FPS sources preferred. Demo loop vidoes are included and may be used as an alternative or in combination with live sources.
-7. System that supports VA-API h264 encode and decode (Most Intel and AMD integrated and discrete graphics cards supported).
+7. System that supports VA-API h264 encode and decode (Most Intel and AMD integrated and discrete graphics cards supported) or an NVIDIA GPU.
 
 ## Initial Setup on clean Ubuntu 22.04 or 24.04 LTS Desktop Installation
 

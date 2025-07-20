@@ -34,6 +34,8 @@ If you change the number of Hailo accelerators in the system or switch between H
 - 2 Hailo: 8 Sources
 - 4 Hailo: 16 Sources
 
+The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS variable for the iris_server containers in the docker compose file. 15FPS is the maximum supported.
+
 ### Adding ONVIF Cameras
 
 ![Add ONVIF Camera](images/Add_ONVIF.png)

@@ -30,8 +30,10 @@ services:
       - 50060:50060
     command: [-logtostderr]
     depends_on:
-      - iris_router
-      - edge_config
+      iris_router:
+        condition: service_healthy
+      edge_config:
+        condition: service_started    
     volumes:
       - hp-config-cache:/tmp/snapshots
       - /tmp/logs:/tmp/logs

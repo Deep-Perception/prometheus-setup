@@ -44,8 +44,10 @@ services:
   edge_config:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:${IMAGE_TAG}
     depends_on:
-      - db
-      - iris_router
+      db:
+        condition: service_healthy
+      iris_router:
+        condition: service_started
     command: [--json_db_file=/data/event_templates.json, --cache_dir=/tmp/cache, -logtostderr]
     environment:
       - MAX_CAMERA_NUM=8

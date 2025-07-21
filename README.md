@@ -38,6 +38,8 @@ If you change the number of Hailo accelerators in the system or switch between H
 
 The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS variable for the iris_server containers in the docker compose file. 15FPS is the maximum supported.
 
+**Known Issue: When running 2 or 4 Hailo-10s, you may experience issues where the driver hangs after stopping and restarting the application one or more times. CHECK failed - Failed to de-serialize 'CreateDevice' and CHECK_SUCCESS failed with status=HAILO_RPC_FAILED(77) - Failed to create device will be present in the logs when this happens. To recover, stop application and run `sudo rmmod hailo_pci && sudo modprobe hailo_pci' or reboot your system.
+
 ### Adding ONVIF Cameras
 
 ![Add ONVIF Camera](images/Add_ONVIF.png)

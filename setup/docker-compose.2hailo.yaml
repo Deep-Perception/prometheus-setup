@@ -105,7 +105,6 @@ services:
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
       - HAILO_DEVICE_IDX=1
       - NO_EVENT_SEND=true
-      - NVIDIA_DRIVER_CAPABILITIES=all
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
     volumes:

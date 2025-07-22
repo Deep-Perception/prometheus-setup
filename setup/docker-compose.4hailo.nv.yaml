@@ -30,10 +30,8 @@ services:
       - 50060:50060
     command: [-logtostderr]
     depends_on:
-      iris_router:
-        condition: service_healthy
-      edge_config:
-        condition: service_started    
+      - iris_router
+      - edge_config
     volumes:
       - hp-config-cache:/tmp/snapshots
       - /tmp/logs:/tmp/logs
@@ -46,8 +44,10 @@ services:
   edge_config:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/edge-config:${IMAGE_TAG}
     depends_on:
-      - db
-      - iris_router
+      db:
+        condition: service_healthy
+      iris_router:
+        condition: service_started
     command: [--json_db_file=/data/event_templates.json, --cache_dir=/tmp/cache, -logtostderr]
     environment:
       - MAX_CAMERA_NUM=8

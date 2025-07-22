@@ -50,7 +50,7 @@ services:
         condition: service_started
     command: [--json_db_file=/data/event_templates.json, --cache_dir=/tmp/cache, -logtostderr]
     environment:
-      - MAX_CAMERA_NUM=32
+      - MAX_CAMERA_NUM=24
       - DB_PASSWORD=postgres
       - DB_USER=postgres
       - DB_NAME=dp_db

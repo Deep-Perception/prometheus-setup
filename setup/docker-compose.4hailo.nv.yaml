@@ -92,10 +92,10 @@ services:
     privileged: true
     command: [--grpc_port=50056]
     environment:
-      - HAILO_MONITOR=1
+      # - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
       # will be forced to use the second choice -- GPU if available, or software.
-      - NO_VAAPI=true
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -110,6 +110,8 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_MULTI_PROC_SERVICE=true
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
@@ -126,6 +128,13 @@ services:
     restart: unless-stopped
     depends_on:
       - webrtc
+      - mediamtx
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50056"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -139,10 +148,11 @@ services:
     privileged: true
     command: [--grpc_port=50057]
     environment:
-      - HAILO_MONITOR=1
+      - INITIAL_SLEEP_TIME=1
+      # - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
       # will be forced to use the second choice -- GPU if available, or software.
-      - NO_VAAPI=true
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -153,6 +163,8 @@ services:
       # - Dark blue: 50,67,128
       - NVIDIA_DRIVER_CAPABILITIES=all
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_MULTI_PROC_SERVICE=true
       - HAILO_DEVICE_IDX=2
       - NO_EVENT_SEND=true
       # Integer value for source FPS, defaulta to 10
@@ -171,6 +183,13 @@ services:
     restart: unless-stopped
     depends_on:
       - webrtc
+      - mediamtx
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50057"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -184,10 +203,11 @@ services:
     privileged: true
     command: [--grpc_port=50058]
     environment:
-      - HAILO_MONITOR=1
+      - INITIAL_SLEEP_TIME=3
+      # - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
       # will be forced to use the second choice -- GPU if available, or software.
-      - NO_VAAPI=true
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -202,6 +222,8 @@ services:
       - NO_EVENT_SEND=true
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_MULTI_PROC_SERVICE=true
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
@@ -216,6 +238,13 @@ services:
     restart: unless-stopped
     depends_on:
       - webrtc
+      - mediamtx
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50058"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -229,10 +258,11 @@ services:
     privileged: true
     command: [--grpc_port=50059]
     environment:
-      - HAILO_MONITOR=1
+      - INITIAL_SLEEP_TIME=5
+      # - HAILO_MONITOR=1
       # Uncomment or set to true if you want to not use VAAPI at all, and the pipeline
       # will be forced to use the second choice -- GPU if available, or software.
-      - NO_VAAPI=true
+      # - NO_VAAPI=true
       # Colors for bounding box and text overlay on the visualizer stream.
       # Depending on the demo environment, you may want to change the color to
       # make the detections standout. Recommended values are:
@@ -247,6 +277,8 @@ services:
       - NO_EVENT_SEND=true
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
+      - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
+      - HAILO_MULTI_PROC_SERVICE=true
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
@@ -261,6 +293,13 @@ services:
     restart: unless-stopped
     depends_on:
       - webrtc
+      - mediamtx
+    healthcheck:
+      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50059"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -319,8 +358,8 @@ services:
   telegraf:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/telegraf:${IMAGE_TAG}
     privileged: true
-    depends_on:
-      - influxdb
+    # depends_on:
+    #   - influxdb
     volumes:
       # Mount RAPL directory
       - /sys/class/powercap:/sys/class/powercap:ro
@@ -349,6 +388,14 @@ services:
       - grafana-data:/var/lib/grafana:rw
     networks:
       - monitoring_net
+  hailo_service:
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:latest
+    network_mode: host
+    privileged: true
+    environment:
+      - HAILO_MONITOR=1
+    volumes:
+      - /tmp/hmon_files:/tmp/hmon_files
     restart: unless-stopped
   hailo-monitor:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-monitor-${HAILO_ARCH}:${IMAGE_TAG}

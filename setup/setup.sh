@@ -71,7 +71,7 @@ sudo apt-get install -f -y
 #
 
 #Deps to build and install kernel module
-sudo apt-get install build-essential dkms pciutils -y 
+sudo apt-get install build-essential dkms pciutils linux-headers-$(uname -r) -y 
 
 # Run lspci -n and filter for vendor 1e60
 devices=$(lspci -n | grep -i "1e60")

@@ -359,7 +359,7 @@ services:
     networks:
       - monitoring_net
   hailo_service:
-    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:latest
+    image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/hailo-service-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
     privileged: true
     environment:

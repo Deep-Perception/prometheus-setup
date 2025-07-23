@@ -110,7 +110,7 @@ services:
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
-      - HAILO_MULTI_PROC_SERVICE=true
+      - HAILO_MULTI_PROC_SERVICE=${USE_HMPS:-false}
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
@@ -156,7 +156,7 @@ services:
       # - Dark blue: 50,67,128
       - IRIS_OVERLAY_COLOR_RGB=0,255,0
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
-      - HAILO_MULTI_PROC_SERVICE=true
+      - HAILO_MULTI_PROC_SERVICE=${USE_HMPS:-false}
       - HAILO_DEVICE_IDX=2
       - NO_EVENT_SEND=true
       # Integer value for source FPS, defaulta to 10
@@ -207,7 +207,7 @@ services:
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
-      - HAILO_MULTI_PROC_SERVICE=true
+      - HAILO_MULTI_PROC_SERVICE=${USE_HMPS:-false}
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/
@@ -254,7 +254,7 @@ services:
       # Integer value for source FPS, defaulta to 10
       # - SOURCE_FPS=10
       - HAILORT_SERVICE_ADDRESS=0.0.0.0:50069
-      - HAILO_MULTI_PROC_SERVICE=true
+      - HAILO_MULTI_PROC_SERVICE=${USE_HMPS:-false}
     volumes:
       - /dev/dri:/dev/dri
       - /dev/:/dev/

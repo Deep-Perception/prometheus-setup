@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Parse command line arguments
+DISABLE_NVIDIA=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --disable-nvidia)
+            DISABLE_NVIDIA=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--disable-nvidia]"
+            exit 1
+            ;;
+    esac
+done
+
 #Cleanup Previous Install
 echo -e "\n\nCleaning up existing containers, this may take a while!\n\n"
 if command -v docker &> /dev/null; then
@@ -126,37 +143,43 @@ fi
 
 NV_DETECTED=false
 
-# Method 1: Check if nvidia-smi command is available and working
-if command -v nvidia-smi &> /dev/null; then
-    if nvidia-smi &> /dev/null; then
-        echo "NVIDIA GPU detected via nvidia-smi"
-        NV_DETECTED=true
-    fi
-fi
-
-# Method 2: Check lspci for NVIDIA devices (fallback)
-if [[ "$NV_DETECTED" == "false" ]]; then
-    if command -v lspci &> /dev/null; then
-        if lspci | grep -i nvidia &> /dev/null; then
-            echo "NVIDIA device detected via lspci"
+# Skip NVIDIA detection if disabled via command line
+if [[ "$DISABLE_NVIDIA" == "true" ]]; then
+    echo "NVIDIA support disabled via --disable-nvidia flag"
+    NV_DETECTED=false
+else
+    # Method 1: Check if nvidia-smi command is available and working
+    if command -v nvidia-smi &> /dev/null; then
+        if nvidia-smi &> /dev/null; then
+            echo "NVIDIA GPU detected via nvidia-smi"
             NV_DETECTED=true
         fi
     fi
-fi
 
-# Method 3: Check /proc/driver/nvidia (another fallback)
-if [[ "$NV_DETECTED" == "false" ]]; then
-    if [[ -d /proc/driver/nvidia ]]; then
-        echo "NVIDIA driver detected in /proc/driver/nvidia"
-        NV_DETECTED=true
+    # Method 2: Check lspci for NVIDIA devices (fallback)
+    if [[ "$NV_DETECTED" == "false" ]]; then
+        if command -v lspci &> /dev/null; then
+            if lspci | grep -i nvidia &> /dev/null; then
+                echo "NVIDIA device detected via lspci"
+                NV_DETECTED=true
+            fi
+        fi
     fi
-fi
 
-# Method 4: Check for NVIDIA kernel modules
-if [[ "$NV_DETECTED" == "false" ]]; then
-    if lsmod | grep -i nvidia &> /dev/null; then
-        echo "NVIDIA kernel module detected"
-        NV_DETECTED=true
+    # Method 3: Check /proc/driver/nvidia (another fallback)
+    if [[ "$NV_DETECTED" == "false" ]]; then
+        if [[ -d /proc/driver/nvidia ]]; then
+            echo "NVIDIA driver detected in /proc/driver/nvidia"
+            NV_DETECTED=true
+        fi
+    fi
+
+    # Method 4: Check for NVIDIA kernel modules
+    if [[ "$NV_DETECTED" == "false" ]]; then
+        if lsmod | grep -i nvidia &> /dev/null; then
+            echo "NVIDIA kernel module detected"
+            NV_DETECTED=true
+        fi
     fi
 fi
 

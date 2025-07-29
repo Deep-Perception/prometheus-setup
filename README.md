@@ -24,6 +24,8 @@ NVIDIA GPUs may have software restrictions that limit the number of simultaneous
 2. Navigate to the setup script folder `cd prometheus-setup/setup`
 3. Run `./setup.sh` and reboot when prompted.
 
+If you want to disable support for nvidia, you can run `./setup --disable-nvidia` and the card detection will be skipped. 
+
 If you change the number of Hailo accelerators in the system or switch between Hailo-8 and Hailo-10 accelerators, you must re-run the `setup.sh` script.
 
 ## Running the Software

@@ -24,9 +24,11 @@ NVIDIA GPUs may have software restrictions that limit the number of simultaneous
 2. Navigate to the setup script folder `cd prometheus-setup/setup`
 3. Run `./setup.sh` and reboot when prompted.
 
-For systems with both Intel/AMD and NVIDIA cards, if you want to disable support for nvidia, you can run `./setup --disable-nvidia` and the card detection will be skipped and VA-API will be used for H264 en/decode purposes. Our setup script installs the NVIDIA container runtime but configuring the NVIDIA drivers is outside the scope of our setup script. To validate the NVIDIA container runtime can access the GPU, you can run `docker run --rm --gpus all nvidia/cuda:12.9.0-base-ubuntu22.04 nvidia-smi`.
+For systems with both Intel/AMD and NVIDIA cards, if you want to disable support for nvidia, you can run `./setup --disable-nvidia`. This skips the NVIDIA card detection and VA-API will be used for H264 en/decode purposes. 
 
-If you change the number of Hailo accelerators in the system or switch between Hailo-8 and Hailo-10 accelerators, you must re-run the `setup.sh` script.
+Our setup script installs the NVIDIA container runtime but configuring the NVIDIA drivers is outside the scope of our setup script. To validate the NVIDIA container runtime can access the GPU, you can run `docker run --rm --gpus all nvidia/cuda:12.9.0-base-ubuntu22.04 nvidia-smi`.
+
+**If you change the number of Hailo accelerators in the system or switch between Hailo-8 and Hailo-10 accelerators, you must re-run the `setup.sh` script.**
 
 ## Running the Software
 

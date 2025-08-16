@@ -129,12 +129,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50056"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -184,12 +178,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50057"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -239,12 +227,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50058"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         reservations:
@@ -294,12 +276,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50059"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     deploy:
       resources:
         reservations:

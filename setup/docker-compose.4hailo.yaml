@@ -128,13 +128,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50056"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
   iris_server2:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
@@ -176,12 +169,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50057"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   iris_server3:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
@@ -223,12 +210,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50058"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   iris_server4:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/iris-server-${HAILO_ARCH}:${IMAGE_TAG}
     network_mode: host
@@ -270,13 +251,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50059"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   dp-envoy:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:${IMAGE_TAG}
     ports:

@@ -125,12 +125,6 @@ services:
     depends_on:
       - webrtc
       - mediamtx
-    healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50056"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   dp-envoy:
     image: us-central1-docker.pkg.dev/deepperception-prometheus/demo1/envoy-proxy:${IMAGE_TAG}
     ports:

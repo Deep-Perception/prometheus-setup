@@ -72,8 +72,7 @@ services:
     volumes:
       - /dev/v4l/by-path:/dev/v4l/by-path
 #     - /dev/v4l/by-id:/dev/v4l/by-id
-      - /sys/class/video4linux:/sys/class/video4linux:ro
-      - /sys/bus/usb/devices:/sys/bus/usb/devices:ro
+      - /sys:/sys:ro
     command: [-logtostderr]
     restart: unless-stopped
   iris_router:

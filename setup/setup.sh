@@ -212,7 +212,7 @@ fi
 if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     echo "HAILO_ARCH=h8" > ../.env
     echo "USE_HMPS=true" >> ../.env
-    echo "IMAGE_TAG=testing" >> ../.env
+    echo "IMAGE_TAG=v1.1.0" >> ../.env
     if [[ "$hailo8_count" -eq 1 ]]; then
         if [[ "$NV_DETECTED" == "true" ]]; then
             cp docker-compose.1hailo.nv.yaml ../docker-compose.yaml
@@ -237,7 +237,7 @@ if [[ "$HAILO_VERSION" == "Hailo-8" ]]; then
     fi
 elif [[ "$HAILO_VERSION" == "Hailo-10" ]]; then
     echo "HAILO_ARCH=h10" > ../.env
-    echo "IMAGE_TAG=testing" >> ../.env
+    echo "IMAGE_TAG=v1.1.0" >> ../.env
     if [[ "$hailo10_count" -eq 1 ]]; then
         if [[ "$NV_DETECTED" == "true" ]]; then
             cp docker-compose.1hailo.nv.yaml ../docker-compose.yaml

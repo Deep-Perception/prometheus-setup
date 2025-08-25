@@ -41,15 +41,15 @@ Our setup script installs the NVIDIA container runtime but configuring the NVIDI
 - 2 Hailo: 8 Sources
 - 4 Hailo: 16 Sources
 
-**Challenger Mode**
-
-Functionality from the previous Challenger demo application has been added to the Prometheus application in version 1.1.0. Challenger mode allows you to toggle between a single stream CPU inference (high end CPU required) and Hailo based inference. The Challenger view shows CPU utilization, Hailo Utilization and Hailo Power metrics. 
-
 The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS variable for the iris_server containers in the docker compose file. 15FPS is the maximum supported. There is one iris_server instance per Hailo device, so if you have 4 Hailo's you must set this variable in 4 places. 
 
 **Known Issue 1:** When running 2 or 4 Hailo-10s, you may experience issues where the driver hangs after stopping and restarting the application one or more times. CHECK failed - Failed to de-serialize 'CreateDevice' and CHECK_SUCCESS failed with status=HAILO_RPC_FAILED(77) - Failed to create device will be present in the logs when this happens. To recover, stop application and run `sudo rmmod hailo_pci && sudo modprobe hailo_pci` or reboot your system.
 
 **Known Issue 2:** Intermittently Hailo APIs for utilization metrics will continuously return 0 resulting in the utilization graph being flat at 0%. When this occurs try restarting the application or reboot your system.
+
+###Challenger Mode###
+
+Functionality from the previous Challenger demo application has been added to the Prometheus application in version 1.1.0. Challenger mode allows you to toggle between a single stream CPU inference (high end CPU required) and Hailo based inference. The Challenger view shows CPU utilization, Hailo Utilization and Hailo Power metrics. 
 
 ### Adding ONVIF Cameras
 

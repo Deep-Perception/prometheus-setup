@@ -21,8 +21,9 @@ NVIDIA GPUs may have software restrictions that limit the number of simultaneous
 ## Initial Setup on clean Ubuntu 22.04 or 24.04 LTS Desktop Installation
 
 1. Clone this repo on to the target machine `git clone https://github.com/Deep-Perception/prometheus-setup.git`
-2. Navigate to the setup script folder `cd prometheus-setup/setup`
-3. Run `./setup.sh` and reboot when prompted.
+2. Optional - checkout a specific release using tags such as: `git checkout v1.1.0`
+3. Navigate to the setup script folder `cd prometheus-setup/setup`
+4. Run `./setup.sh` and reboot when prompted.
 
 For systems with both Intel/AMD and NVIDIA cards, if you want to disable support for nvidia, you can run `./setup --disable-nvidia`. This skips the NVIDIA card detection and VA-API will be used for H264 en/decode purposes. 
 
@@ -40,7 +41,11 @@ Our setup script installs the NVIDIA container runtime but configuring the NVIDI
 - 2 Hailo: 8 Sources
 - 4 Hailo: 16 Sources
 
-The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS variable for the iris_server containers in the docker compose file. 15FPS is the maximum supported. There is one iris_server instance per Hailo device, so if you have 4 Hailo's you must set this variable in 4 places.
+**Challenger Mode**
+
+Functionality from the previous Challenger demo application has been added to the Prometheus application in version 1.1.0. Challenger mode allows you to toggle between a single stream CPU inference (high end CPU required) and Hailo based inference. The Challenger view shows CPU utilization, Hailo Utilization and Hailo Power metrics. 
+
+The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS variable for the iris_server containers in the docker compose file. 15FPS is the maximum supported. There is one iris_server instance per Hailo device, so if you have 4 Hailo's you must set this variable in 4 places. 
 
 **Known Issue 1:** When running 2 or 4 Hailo-10s, you may experience issues where the driver hangs after stopping and restarting the application one or more times. CHECK failed - Failed to de-serialize 'CreateDevice' and CHECK_SUCCESS failed with status=HAILO_RPC_FAILED(77) - Failed to create device will be present in the logs when this happens. To recover, stop application and run `sudo rmmod hailo_pci && sudo modprobe hailo_pci` or reboot your system.
 

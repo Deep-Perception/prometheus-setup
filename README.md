@@ -47,7 +47,7 @@ The framerate defaults to 10FPS but can be adjusted by setting the SOURCE_FPS va
 
 **Known Issue 2:** Intermittently Hailo APIs for utilization metrics will continuously return 0 resulting in the utilization graph being flat at 0%. When this occurs try restarting the application or reboot your system.
 
-###Challenger Mode###
+### Challenger Mode ###
 
 Functionality from the previous Challenger demo application has been added to the Prometheus application in version 1.1.0. Challenger mode allows you to toggle between a single stream CPU inference (high end CPU required) and Hailo based inference. The Challenger view shows CPU utilization, Hailo Utilization and Hailo Power metrics. 
 

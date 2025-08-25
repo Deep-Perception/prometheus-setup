@@ -70,7 +70,9 @@ services:
     ports:
       - "50054:50054"
     volumes:
-      - /dev/v4l/by-id:/dev/v4l/by-id
+      - /dev/v4l/by-path:/dev/v4l/by-path
+#     - /dev/v4l/by-id:/dev/v4l/by-id
+      - /sys:/sys:ro
     command: [-logtostderr]
     restart: unless-stopped
   iris_router:
